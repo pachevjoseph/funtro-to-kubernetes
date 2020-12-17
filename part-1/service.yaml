@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-replica-set
+spec:
+  # The selector we want to use to have this service route to
+  selector:
+    topic: replica-set
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

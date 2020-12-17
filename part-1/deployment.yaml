@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+    topic: deployment
+spec:
+  # The amount of pods we want deployed
+  replicas: 2
+  selector:
+    # The label selector we want to use to identify this object
+    matchLabels:
+      app: nginx
+      topic: deployment
+  template:
+    metadata:
+      labels:
+        app: nginx
+        topic: deployment
+    spec:
+      containers:
+      - name: nginx
+        image: rancher/hello-world
+        ports:
+        - containerPort: 80

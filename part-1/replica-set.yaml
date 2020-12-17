@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-replicas
+  labels:
+    topic: replica-set
+spec:
+  # The amount of pods we want deployed
+  replicas: 3
+  selector:
+    # The label selector we want to use to identify this object
+    matchLabels:
+      topic: replica-set
+  template:
+    metadata:
+      labels:
+        topic: replica-set
+    spec:
+      containers:
+      - name: nginx-rs-app
+        image: rancher/hello-world
+        ports:
+        - containerPort: 80

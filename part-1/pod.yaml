@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  labels:
+    topic: single-pod
+spec:
+  containers:
+  - name: nginx-app
+    image: rancher/hello-world
