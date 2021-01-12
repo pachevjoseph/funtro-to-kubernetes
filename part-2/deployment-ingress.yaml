@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment-ingress
+  # The label selector we want to use to identify this deployment object
+  labels:
+    app: nginx
+    topic: ingress
+spec:
+  # The amount of pods we want deployed
+  replicas: 2
+  # This determines which nodes the pods from this deployment will be scheduled and how they are managed by replica-set
+  selector:
+    matchLabels:
+      app: nginx
+      topic: ingress
+  template:
+    metadata:
+      # The label selector we want to use to identify the pods
+      labels:
+        app: nginx
+        topic: ingress
+    spec:
+      containers:
+        - name: nginx
+          image: rancher/hello-world
+          ports:
+            - containerPort: 80
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: topic-ingress-service
+spec:
+  # The selector we want to use to have this service route to
+  selector:
+    topic: ingress
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: deployment-ingress
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /hello
+        pathType: Prefix
+        backend:
+          service:
+            name: topic-ingress-service
+            port: 
+              number: 80
+      - path: /img/
+        pathType: Prefix
+        backend:
+          service:
+            name: topic-ingress-service
+            port: 
+              number: 80

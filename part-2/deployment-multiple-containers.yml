@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-multiple-containers
+  # The label selector we want to use to identify this deployment object
+  labels:
+    app: nginx
+    topic: multiple-containers
+spec:
+  # This determines which nodes the pods from this deployment will be scheduled and how they are managed by replica-set
+  selector:
+    matchLabels:
+      app: nginx
+      topic: multiple-containers
+  template:
+    metadata:
+      # The label selector we want to use to identify the pods
+      labels:
+        app: nginx
+        topic: multiple-containers
+    spec:
+      containers:
+        - name: nginx
+          image: rancher/hello-world
+          ports:
+            - containerPort: 80
+      initContainers:
+        - name: wait-for-google
+          image: busybox:1.28
+          command: ['sh', '-c', 'until nc -z google.com:80; do echo waiting for google; sleep 2; done;']
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: topic-multiple-containers
+spec:
+  # The selector we want to use to have this service route to
+  selector:
+    app: nginx
+    topic: multiple-containers
+  ports:
+    - protocol: TCP
+      name: tcp80
+      port: 80
+      targetPort: 80
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: deployment-ingress
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /multiple
+        pathType: Prefix
+        backend:
+          service:
+            name: topic-multiple-containers
+            port: 
+              number: 80
+      - path: /img/
+        pathType: Prefix
+        backend:
+          service:
+            name: topic-multiple-containers
+            port: 
+              number: 80

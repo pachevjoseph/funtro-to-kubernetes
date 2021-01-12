@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: deployment-configuration-secret
+type: Opaque
+stringData:
+  SECRET_ENV: my-secret-env
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: deployment-configuration-map
+data:
+  secret-file: |
+    A secret file contains secrets. Those secrets must never be revealed. Remember
+    this well.
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-deployment-configuration
+  # The label selector we want to use to identify this deployment object
+  labels:
+    app: busybox
+    topic: configuration-and-secrets
+spec:
+  # This determines which nodes the pods from this deployment will be scheduled and how they are managed by replica-set
+  selector:
+    matchLabels:
+      app: busybox
+      topic: configuration-and-secrets
+  template:
+    metadata:
+      labels:
+        app: busybox
+        topic: configuration-and-secrets
+    spec:
+      containers:
+      - name: busybox
+        image: busybox
+        envFrom:
+          - secretRef:
+              name: deployment-configuration-secret
+        env:
+          - name: MY_ENV
+            value: NoSecretHere
+
+        command: ["sh", "-c", "echo Regular ENV MY_ENV:  $MY_ENV && echo SECRET_ENV:  $SECRET_ENV && $SECRET_FILE cat /opt/secret-file"]
+        volumeMounts:
+          - name: secret-file
+            mountPath: /opt/secret-file
+            subPath: secret-file
+            readOnly: true
+      volumes:
+        - name: secret-file
+          configMap:
+            name: deployment-configuration-map
+            items:
+              - key: secret-file
+                path: secret-file
+

@@ -2,17 +2,19 @@ apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
   name: nginx-replicas
+  # The label selector we want to use to identify this object
   labels:
     topic: replica-set
 spec:
   # The amount of pods we want deployed
   replicas: 3
   selector:
-    # The label selector we want to use to identify this object
+  # This determines which nodes the pods from this deployment will be scheduled and how they are managed by replica-set
     matchLabels:
       topic: replica-set
   template:
     metadata:
+      # Actual pod labels
       labels:
         topic: replica-set
     spec:

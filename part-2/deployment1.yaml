@@ -1,28 +1,46 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-deployment
+  name: nginx-deployment-ingress
   # The label selector we want to use to identify this deployment object
   labels:
     app: nginx
-    topic: deployment
+    topic: labels-and-selectors
 spec:
   # The amount of pods we want deployed
   replicas: 2
-  selector:
   # This determines which nodes the pods from this deployment will be scheduled and how they are managed by replica-set
+  selector:
     matchLabels:
       app: nginx
-      topic: deployment
+      topic: labels-and-selectors
   template:
     metadata:
-      # Actual pod labels for selectors
       labels:
         app: nginx
-        topic: deployment
+        topic: labels-and-selectors
     spec:
       containers:
       - name: nginx
         image: rancher/hello-world
+        env:
+          - name: MY_ENV
+            value: NoSecretHere
         ports:
         - containerPort: 80
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: labels-and-selectors
+spec:
+  # The selector we want to use to have this service route to
+  selector:
+    topic: labels-and-selectors
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
